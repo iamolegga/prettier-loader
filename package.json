@@ -1,0 +1,27 @@
+{
+  "name": "prettier-loader",
+  "version": "1.0.0",
+  "description": "webpack prettier loader",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iamolegga/prettier-loader.git"
+  },
+  "keywords": [
+    "webpack",
+    "prettier"
+  ],
+  "author": "Oleg Repin <iamolegga@gmail.com> (http://github.com/iamolegga)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/iamolegga/prettier-loader/issues"
+  },
+  "homepage": "https://github.com/iamolegga/prettier-loader#readme",
+  "dependencies": {
+    "loader-utils": "^1.1.0",
+    "prettier": "^1.4.4"
+  }
+}
