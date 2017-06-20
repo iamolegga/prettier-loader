@@ -1,6 +1,8 @@
 # prettier-loader
 
-Prettier loader for Webpack.
+[Prettier](https://github.com/prettier/prettier) loader for [Webpack](https://github.com/webpack/webpack).
+
+The main idea is to make an auto `prettier`-fying source code on save, but to do it in cross-IDE manner: without installing and configuring plugins on every developer's machine, but integrate it in a development flow.
 
 ## Installation
 
