@@ -23,9 +23,14 @@ module.exports = {
     rules: [
       {
         test: /\.jsx?$/,
-        enforce: 'pre',
-        loader: 'prettier-loader',
-        options: { /* prettier options */ }
+        use: {
+          loader: 'prettier-loader',
+          // additional options assigned to your options in
+          // - .prettierrc,
+          // - prettier.config.js,
+          // - "prettier" property in package.json
+          options: { /* prettier options */ },
+        }
       }
     ]
   }
