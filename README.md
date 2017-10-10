@@ -12,7 +12,7 @@ npm install prettier-loader prettier --save-dev
 
 ## Usage
 
-Now supports only Webpack 2.
+Now supports only webpack 2 and 3.
 Create an issue on pr, if you need to support Webpack 1.
 
 ```js
