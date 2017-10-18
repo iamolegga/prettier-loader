@@ -4,8 +4,7 @@
   "description": "webpack prettier loader",
   "main": "prettier-loader.js",
   "engines": {
-    "node": ">=4.0.0",
-    "npm": "5.4.2"
+    "node": ">=4.0.0"
   },
   "scripts": {
     "lint": "prettier --write index.js && eslint index.js --fix && prettier --write prettier-loader.js && eslint prettier-loader.js --fix && prettier --write __tests__/index.js && eslint __tests__/index.js --fix",
