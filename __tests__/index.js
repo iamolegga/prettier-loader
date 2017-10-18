@@ -1,22 +1,22 @@
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
-const prettier = require('prettier');
-const cosmiconfig = require('cosmiconfig');
+var fs = require('fs');
+var os = require('os');
+var path = require('path');
+var prettier = require('prettier');
+var cosmiconfig = require('cosmiconfig');
 
-const promisedConfig = cosmiconfig('prettier')
+var promisedConfig = cosmiconfig('prettier')
   .load(process.cwd())
   .then(result => (result ? result.config : {}), () => ({}));
 
 // eslint-disable-next-line node/no-unpublished-require
-const rimraf = require('rimraf');
+var rimraf = require('rimraf');
 // eslint-disable-next-line node/no-unpublished-require
-const webpack = require('webpack');
+var webpack = require('webpack');
 
-let folder;
-let compiler;
-let sourceName;
-const loaderOptions = {
+var folder;
+var compiler;
+var sourceName;
+var loaderOptions = {
   tabWidth: 8,
 };
 
@@ -24,9 +24,9 @@ beforeEach(() => {
   folder = fs.mkdtempSync(`${os.tmpdir()}${path.sep}`);
 
   sourceName = `/${folder}/source.js`;
-  const sourceContent = `${'very().'.repeat(20)}long("chaining")`;
-  const indexName = `/${folder}/index.js`;
-  const indexContent = `require('./source.js')`;
+  var sourceContent = `${'very().'.repeat(20)}long("chaining")`;
+  var indexName = `/${folder}/index.js`;
+  var indexContent = `require('./source.js')`;
 
   fs.writeFileSync(sourceName, sourceContent);
   fs.writeFileSync(indexName, indexContent);
@@ -69,8 +69,8 @@ test('should format source with config', done => {
     }
 
     promisedConfig.then(config => {
-      const prettierOptions = Object.assign({}, config, loaderOptions);
-      const content = fs.readFileSync(sourceName).toString('utf8');
+      var prettierOptions = Object.assign({}, config, loaderOptions);
+      var content = fs.readFileSync(sourceName).toString('utf8');
 
       // check prettier changed source file
       expect(prettier.check(content, prettierOptions)).toBe(true);
