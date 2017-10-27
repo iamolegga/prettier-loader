@@ -16,10 +16,15 @@ module.exports = function(source, map) {
   }
 
   promisedConfig.then(config => {
-    var prettierSource = prettier.format(
-      source,
-      Object.assign({}, config, loaderUtils.getOptions(this))
-    );
+    var prettierSource;
+    try {
+      prettierSource = prettier.format(
+        source,
+        Object.assign({}, config, loaderUtils.getOptions(this))
+      );
+    } catch (e) {
+      return callback(e);
+    }
 
     if (prettierSource !== source) {
       try {
