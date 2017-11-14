@@ -13,7 +13,8 @@ module.exports = function(source, map) {
   var callback = this.async();
   var ext = path.extname(this.resourcePath);
 
-  if (!new RegExp(this.query.test).test(this.context)) {
+  // .vue extension checking is a workaround for ignoring actual vue files when using vue-loader
+  if (!new RegExp(this.query.test).test(this.context) || ext === '.vue') {
     return callback(null, source, map);
   }
 
