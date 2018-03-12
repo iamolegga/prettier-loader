@@ -12,7 +12,8 @@ npm install prettier-loader prettier --save-dev
 
 ## Usage
 
-Now supports only webpack 2 and 3.
+Supports only webpack >= 2.
+Use with prettier >=1.6
 Create an issue on pr, if you need to support Webpack 1.
 
 ```js
@@ -25,11 +26,17 @@ module.exports = {
         test: /\.jsx?$/,
         use: {
           loader: 'prettier-loader',
-          // additional options assigned to your options in
-          // - .prettierrc,
-          // - prettier.config.js,
-          // - "prettier" property in package.json
-          options: { /* prettier options */ },
+          // force this loader to run first
+          enforce: 'pre',
+          // avoid running prettier on all the files!
+          // use it only on your source code and not on dependencies!
+          exclude: /node_modules/,
+          options: {
+            // additional prettier options assigned to options in
+            // - .prettierrc,
+            // - prettier.config.js,
+            // - "prettier" property in package.json
+          },
         }
       }
     ]
