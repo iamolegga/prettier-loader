@@ -19,12 +19,21 @@ var sourceName;
 var loaderOptions = {
   tabWidth: 8,
 };
+var matrixCode = `matrix(
+  1, 0, 0,
+  0, 1, 0,
+  0, 0, 1
+)`;
 
 beforeEach(() => {
   folder = fs.mkdtempSync(`${os.tmpdir()}${path.sep}`);
 
   sourceName = `/${folder}/source.js`;
-  var sourceContent = `${'very().'.repeat(20)}long("chaining")`;
+  var sourceContent = `
+${'very().'.repeat(20)}long("chaining")
+// prettier-ignore
+${matrixCode}
+`;
   var indexName = `/${folder}/index.js`;
   var indexContent = `require('./source.js')`;
 
@@ -81,6 +90,9 @@ test('should format source with config', done => {
 
       // check getting options from loader
       expect(content).toMatch(');');
+
+      // check ignoring using comments
+      expect(content).toMatch(matrixCode);
       done();
     });
   });
