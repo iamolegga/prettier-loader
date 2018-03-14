@@ -1,6 +1,6 @@
 {
   "name": "prettier-loader",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "webpack prettier loader",
   "main": "prettier-loader.js",
   "engines": {
