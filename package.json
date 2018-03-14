@@ -25,7 +25,7 @@
   },
   "homepage": "https://github.com/iamolegga/prettier-loader#readme",
   "dependencies": {
-    "cosmiconfig": "^3.1.0",
+    "ignore": "^3.3.7",
     "loader-utils": "^1.1.0"
   },
   "devDependencies": {
