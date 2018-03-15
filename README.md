@@ -62,6 +62,7 @@ So there is different types of how to use it in project, and pros and cons of ea
     - format code on every save (if working with webpack-dev-server)
     - works in background
     - consistent prettier settings on project
+    - updating all the codebase when just running with new prettier version
   
   - Cons:
     - works only on webpack dependent projects
