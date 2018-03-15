@@ -38,32 +38,32 @@ So there is different types of how to use it in project, and pros and cons of ea
   
 - [Watching For Changes](https://prettier.io/docs/en/watching-files.html)
 
-  + Pros
+  + Pros:
     - no configuring codebase
     - format code on every save
     - works in background
     - consistent prettier settings on project
   
-  - Cons
-    - if you have already watcher for changing files (for example, webpack-dev-server, watchman etc) this is another one watcher in your memory
+  - Cons:
+    - if you have already watcher for changing files (for example, webpack-dev-server, watchman etc) this is another one watcher in your memory, and it could trigger your bundler twice becouse of of 1) saving by user 2) rewriting by prettier
 
 - [CLI](https://prettier.io/docs/en/cli.html)
 
-  + Pros
+  + Pros:
     - no configuring codebase
   
-  - Cons
+  - Cons:
     - you can not see prettier changes on save
     - there can be mestakes when running CLI-command if it's not saved in some place (for example npm-scripts)
 
 - [This Webpack Loader](https://www.npmjs.com/package/prettier-loader)
 
-  + Pros
+  + Pros:
     - format code on every save (if working with webpack-dev-server)
     - works in background
     - consistent prettier settings on project
   
-  - Cons
+  - Cons:
     - works only on webpack dependent projects
 
 So, in two words, the main idea is to make an auto `prettier`-fying source code on save, but to do it in cross-IDE manner: without installing and configuring plugins on every developer's machine, but integrate it in a development flow using `webpack`.
