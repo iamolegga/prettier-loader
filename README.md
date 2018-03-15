@@ -5,6 +5,7 @@
 ---
 
 [![Travis][travis-badge]][travis]
+[![Coverage Status][coveralls-badge]][coveralls]
 [![version][version-badge]][package]
 [![downloads][downloads-badge]][npmcharts]
 [![Node version support][node-version]][package]
@@ -180,6 +181,8 @@ SOFTWARE.
 
 [travis-badge]: https://img.shields.io/travis/iamolegga/prettier-loader.svg?style=flat-square
 [travis]: https://travis-ci.org/iamolegga/prettier-loader
+[coveralls-badge]: https://coveralls.io/repos/github/iamolegga/prettier-loader/badge.svg?branch=master
+[coveralls]: https://coveralls.io/github/iamolegga/prettier-loader?branch=master
 [version-badge]: https://img.shields.io/npm/v/prettier-loader.svg?style=flat-square
 [package]: https://www.npmjs.com/package/prettier-loader
 [downloads-badge]: https://img.shields.io/npm/dm/prettier-loader.svg?style=flat-square
