@@ -4,6 +4,7 @@
 
 ---
 
+[![Travis][travis-badge]][travis]
 [![version][version-badge]][package]
 [![downloads][downloads-badge]][npmcharts]
 [![Node version support][node-version]][package]
@@ -177,6 +178,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
+[travis-badge]: https://img.shields.io/travis/iamolegga/prettier-loader.svg?style=flat-square
+[travis]: https://travis-ci.org/iamolegga/prettier-loader
 [version-badge]: https://img.shields.io/npm/v/prettier-loader.svg?style=flat-square
 [package]: https://www.npmjs.com/package/prettier-loader
 [downloads-badge]: https://img.shields.io/npm/dm/prettier-loader.svg?style=flat-square
