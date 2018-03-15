@@ -15,67 +15,67 @@
 
 ## Purpose
 
-Prettier is one of the best tools that really help developers to not waste time on codestyle.
+Prettier is one of the best tools that really help developers not to waste time on codestyle.
 
-So there is different types of how to use it in project, and pros and cons of each:
+Listed below are some of the ways one could employ prettier in a project:
 
 - [Editor Integration](https://prettier.io/docs/en/editors.html)
 
   - Pros:
-    - no configuring codebase
-    - format code on every save
+    - no overhead bootstrapping code
+    - autoformatting on every save
 
   - Cons:
-    - every developer should setup and configure editor's plugin on his own
-    - if working in big team different editors of developers could have different settings, so each could have different editor's prettier setting that can override default setting, that not set in `.prettierrc`, or developer can forget to install `node_modules` and editor will format with global installed prettier of old version, etc. This all buggy situations when project settings could be affected by every developer not consistently
+    - every developer needs to setup and configure editor's plugin manually
+    - teammates can have conflicting plugin settings that might override default settings in an unpredictable way. Or one could forget to install `node_modules` and a globally installed `prettier` will be used instead, which might be of older version, etc. This leads to frustrating hiccups in the workflow and, potentially, bugs.
 
 - [Pre-commit Hook](https://prettier.io/docs/en/precommit.html)
 
   - Pros:
-    - works in background (i.e. developer don't have to think about it)
-    - consistent prettier settings on project
+    - works in the background (i.e. developer doesn't have to think about it)
+    - consistent prettier settings in the project
   
   - Cons:
     - you can not see prettier changes on save
-  
+
 - [Watching For Changes](https://prettier.io/docs/en/watching-files.html)
 
   + Pros:
-    - no configuring codebase
-    - format code on every save
-    - works in background
-    - consistent prettier settings on project
+    - no overhead bootstrapping code
+    - autoformatting on every save
+    - works in the background
+    - consistent prettier settings in the project
   
   - Cons:
-    - if you have already watcher for changing files (for example, webpack-dev-server, watchman etc) this is another one watcher in your memory, and it could trigger your bundler twice becouse of of 1) saving by user 2) rewriting by prettier
+    - if you already have another watcher (e.g. `webpack-dev-server` or `watchman`), your bundler will be triggered twice on every change: first by user, then by prettier formatting
 
 - [CLI](https://prettier.io/docs/en/cli.html)
 
   + Pros:
-    - no configuring codebase
+    - no overhead bootstrapping code
   
   - Cons:
     - you can not see prettier changes on save
-    - there can be mestakes when running CLI-command if it's not saved in some place (for example npm-scripts)
+    - prone to errors unless stored somewhere (e.g. npm-scripts)
 
 - [This Webpack Loader](https://www.npmjs.com/package/prettier-loader)
 
   + Pros:
-    - format code on every save (if working with webpack-dev-server)
-    - works in background
-    - consistent prettier settings on project
-    - updating all the codebase when just running with new prettier version
+    - autoformatting on every save (if working with webpack-dev-server)
+    - works in the background
+    - consistent prettier settings in the project
+    - updates all the codebase when new prettier version is released
   
   - Cons:
-    - works only on webpack dependent projects
+    - works only on webpack-dependent projects
 
-So, in two words, the main idea is to make an auto `prettier`-fying source code on save, but to do it in cross-IDE manner: without installing and configuring plugins on every developer's machine, but integrate it in a development flow using `webpack`.
+In short, idea is to make source code auto-`prettier`-fy on every save. But to do it in a cross-IDE manner, using `webpack`, eliminating the need to install and configure plugins on each developer's machine.
 
 ## Features
 
-- support of [prettier configuration files](https://prettier.io/docs/en/configuration.html): `.prettierrc`, `prettier.config.js`, `"prettier"` key in your `package.json` file
+- support [prettier configuration files](https://prettier.io/docs/en/configuration.html): `.prettierrc`, `prettier.config.js`, `"prettier"` key in your `package.json` file
 - support of [ignoring code](https://prettier.io/docs/en/ignore.html) using both comments and `.prettierignore` file
-- overriding configuration files in loader options
+- override configuration files in loader options
 - zero configuration of loader options for supporting all features out of the box
 
 ## Requirements
