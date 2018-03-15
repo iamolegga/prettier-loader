@@ -156,7 +156,7 @@ All pull requests that respect next rules are welcome:
 
 MIT License
 
-Copyright (c) 2017 I am Olegga
+Copyright (c) 2017 Oleg Repin
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
