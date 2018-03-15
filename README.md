@@ -6,6 +6,7 @@
 
 [![version][version-badge]][package]
 [![downloads][downloads-badge]][npmcharts]
+[![Node version support][node-version]][package]
 [![MIT License][license-badge]][license]
 [![PRs Welcome][prs-badge]][prs]
 [![Code of Conduct][coc-badge]][coc]
@@ -66,9 +67,10 @@ module.exports = {
 [package]: https://www.npmjs.com/package/prettier-loader
 [downloads-badge]: https://img.shields.io/npm/dm/prettier-loader.svg?style=flat-square
 [npmcharts]: https://npmcharts.com/compare/prettier-loader
+[node-version]: https://img.shields.io/node/v/prettier-loader.svg?style=flat-square
 [license-badge]: https://img.shields.io/npm/l/prettier-loader.svg?style=flat-square
 [license]: https://github.com/iamolegga/prettier-loader/blob/master/LICENSE
 [prs-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square
 [prs]: http://makeapullrequest.com
 [coc-badge]: https://img.shields.io/badge/code%20of-conduct-ff69b4.svg?style=flat-square
-[coc]: https://github.com/paypal/glamorous/blob/master/other/CODE_OF_CONDUCT.md
+[coc]: https://github.com/iamolegga/prettier-loader/blob/master/CODE_OF_CONDUCT.md
