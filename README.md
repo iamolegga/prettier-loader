@@ -47,7 +47,7 @@ Listed below are some of the ways one could employ prettier in a project:
     - consistent prettier settings in the project
   
   - Cons:
-    - if you already have another watcher (e.g. `webpack-dev-server` or `watchman`), your bundler will be triggered twice on every change: first by user, then by prettier formatting
+    - if you already have another watcher (e.g. `webpack-dev-server` or `watchman`), you'll be wasting resources and your bundler will be triggered twice on every change: first by user, then by prettier formatting
 
 - [CLI](https://prettier.io/docs/en/cli.html)
 
@@ -69,7 +69,7 @@ Listed below are some of the ways one could employ prettier in a project:
   - Cons:
     - works only on webpack-dependent projects
 
-In short, idea is to make source code auto-`prettier`-fy on every save. But to do it in a cross-IDE manner, using `webpack`, eliminating the need to install and configure plugins on each developer's machine.
+In short, idea is to make source code auto-`prettier`-fy on every save. But to do it in a cross-IDE manner. Use of `webpack`, eliminates the need to install and configure plugins on each developer's machine and also provides better efficency, as no other watchers are needed.
 
 ## Features
 
