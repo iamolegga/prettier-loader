@@ -15,24 +15,33 @@ var __clearIgnoreManager = require('../prettier-loader').__clearIgnoreManager;
 var SEPARATOR = path.sep;
 var testFolder;
 
-function prepare(webpackConfiguration, files, entryFileName) {
+function writeFiles(files) {
   testFolder = fs.mkdtempSync(`${os.tmpdir()}${SEPARATOR}`);
 
-  var testFiles = Object.keys(files).reduce((acc, fileName) => {
+  return Object.keys(files).reduce((acc, fileName) => {
     var fullPath = `${testFolder}${SEPARATOR}${fileName}`;
     var content = files[fileName];
     fs.writeFileSync(fullPath, content);
     acc[fullPath] = content;
     return acc;
   }, {});
+}
+
+function getCompiler(webpackConfiguration, entryFileName) {
+  return webpack(
+    Object.assign({}, webpackConfiguration, {
+      entry: `${testFolder}${SEPARATOR}${entryFileName}`,
+      output: { path: testFolder },
+    })
+  );
+}
+
+function run(webpackConfiguration, files, entryFileName) {
+  var testFiles = writeFiles(files);
+  var webpackCompiler = getCompiler(webpackConfiguration, entryFileName);
 
   return new Promise((resolve, reject) => {
-    webpack(
-      Object.assign({}, webpackConfiguration, {
-        entry: `${testFolder}${SEPARATOR}${entryFileName}`,
-        output: { path: testFolder },
-      })
-    ).run((error, stats) => {
+    webpackCompiler.run((error, stats) => {
       if (error) {
         return reject(error);
       }
@@ -45,11 +54,22 @@ function prepare(webpackConfiguration, files, entryFileName) {
   });
 }
 
+function watch(webpackConfiguration, files, entryFileName, watchOpts, cb) {
+  var testFiles = writeFiles(files);
+  var webpackCompiler = getCompiler(webpackConfiguration, entryFileName);
+
+  return webpackCompiler.watch(watchOpts, (error, stats) =>
+    cb(error, stats, testFiles)
+  );
+}
+
 function getWebpackConfigWithRules(rules) {
   return {
     context: '/',
     module: { rules },
-    resolveLoader: { modules: [path.join(__dirname, '..'), 'node_modules'] },
+    resolveLoader: {
+      modules: [path.join(__dirname, '..'), 'node_modules'],
+    },
   };
 }
 
@@ -85,7 +105,7 @@ describe('pass options', () => {
       { test: /\.js$/, use: { loader: 'prettier-loader' } },
     ]);
 
-    return prepare(webpackConfiguration, files, entryFile).then(testFiles => {
+    return run(webpackConfiguration, files, entryFile).then(testFiles => {
       var entryPath = Object.keys(testFiles)[0];
       var entryContent = getContent(entryPath);
 
@@ -109,7 +129,7 @@ describe('pass options', () => {
       },
     ]);
 
-    return prepare(webpackConfiguration, files, entryFile).then(testFiles => {
+    return run(webpackConfiguration, files, entryFile).then(testFiles => {
       var entryPath = Object.keys(testFiles)[0];
       var entryContent = getContent(entryPath);
 
@@ -131,7 +151,7 @@ describe('pass options', () => {
       { test: /\.js$/, use: { loader: 'prettier-loader' } },
     ]);
 
-    return prepare(webpackConfiguration, files, entryFile).then(testFiles => {
+    return run(webpackConfiguration, files, entryFile).then(testFiles => {
       var entryPath = Object.keys(testFiles).find(k => k.includes(entryFile));
       var entryContent = getContent(entryPath);
 
@@ -158,7 +178,7 @@ describe('pass options', () => {
       },
     ]);
 
-    return prepare(webpackConfiguration, files, entryFile).then(testFiles => {
+    return run(webpackConfiguration, files, entryFile).then(testFiles => {
       var entryPath = Object.keys(testFiles).find(k => k.includes(entryFile));
       var entryContent = getContent(entryPath);
 
@@ -193,7 +213,7 @@ ${MATRIX_CODE}`,
       { test: /\.js$/, use: { loader: 'prettier-loader' } },
     ]);
 
-    return prepare(webpackConfiguration, files, entryFile).then(testFiles => {
+    return run(webpackConfiguration, files, entryFile).then(testFiles => {
       var entryPath = Object.keys(testFiles).find(k => k.includes(entryFile));
       var entryContent = getContent(entryPath);
 
@@ -213,11 +233,57 @@ ${MATRIX_CODE}`,
       { test: /\.js$/, use: { loader: 'prettier-loader' } },
     ]);
 
-    return prepare(webpackConfiguration, files, entryFile).then(testFiles => {
+    return run(webpackConfiguration, files, entryFile).then(testFiles => {
       var entryPath = Object.keys(testFiles).find(k => k.includes(entryFile));
       var entryContent = getContent(entryPath);
 
       expect(entryContent).toMatch(MATRIX_CODE);
+    });
+  });
+
+  test('should emit changes only once with watch mode', done => {
+    var entryFile = 'index.js';
+
+    var files = {
+      [entryFile]: MATRIX_CODE,
+    };
+
+    var webpackConfiguration = getWebpackConfigWithRules([
+      {
+        test: /\.js$/,
+        use: { loader: 'prettier-loader', options: { watch: true } },
+      },
+      {
+        test: /\.js$/,
+        use: { loader: 'watch-helper' },
+      },
+    ]);
+
+    // webpackConfiguration.devServer =
+    var watchOpts = {
+      poll: 1000,
+    };
+
+    let rsolveWatchFirstCbPromise;
+    const watchFirstCbPromise = new Promise(r => {
+      rsolveWatchFirstCbPromise = r;
+    });
+    let cbCallTimes = 0;
+    const cb = (error, stats, watchFiles) => {
+      if (cbCallTimes == 0) {
+        rsolveWatchFirstCbPromise();
+        fs.writeFileSync(Object.keys(watchFiles)[0], MATRIX_CODE);
+      }
+      cbCallTimes++;
+    };
+
+    var watcher = watch(webpackConfiguration, files, entryFile, watchOpts, cb);
+
+    watchFirstCbPromise.then(() => {
+      setTimeout(() => {
+        expect(cbCallTimes).toBe(2);
+        watcher.close(done);
+      }, watchOpts.poll * 2 + 1000);
     });
   });
 });

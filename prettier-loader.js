@@ -11,10 +11,14 @@ function getConfig(filePath, loaderOptions) {
   if (configsCache[filePath]) {
     return Promise.resolve(configsCache[filePath]);
   }
+  var options = JSON.parse(JSON.stringify(loaderOptions || {}));
+  if ('watch' in options) {
+    delete options.watch;
+  }
   return prettier
-    .resolveConfig(filePath, (loaderOptions || {}).resolveConfigOptions)
+    .resolveConfig(filePath, options.resolveConfigOptions)
     .then(config => {
-      var mergedConfig = Object.assign({}, config || {}, loaderOptions);
+      var mergedConfig = Object.assign({}, config || {}, options);
       configsCache[filePath] = mergedConfig;
       return mergedConfig;
     });
@@ -80,6 +84,23 @@ module.exports = function(source, map) {
 
     callback(null, prettierSource, map);
   });
+};
+
+module.exports.pitch = function() {
+  if ((loaderUtils.getOptions(this) || {}).watch) {
+    if (!global.prettierLoaderWatchCache) {
+      this.emitWarning(
+        new Error(
+          `Add 'prettier-loader/watch-helper' to cancel double build on change\n` +
+            `Read here: ${require('./package.json').homepage}`
+        )
+      );
+    } else if (global.prettierLoaderWatchCache.has(this.resourcePath)) {
+      var result = global.prettierLoaderWatchCache.get(this.resourcePath);
+      global.prettierLoaderWatchCache.delete(this.resourcePath);
+      return result;
+    }
+  }
 };
 
 module.exports.__clearIgnoreManager = () => {
