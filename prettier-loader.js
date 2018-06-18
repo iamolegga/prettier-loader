@@ -15,6 +15,7 @@ function getConfig(filePath, loaderOptions) {
     .resolveConfig(filePath, (loaderOptions || {}).resolveConfigOptions)
     .then(config => {
       var mergedConfig = Object.assign({}, config || {}, loaderOptions);
+      delete mergedConfig.resolveConfigOptions;
       configsCache[filePath] = mergedConfig;
       return mergedConfig;
     });
