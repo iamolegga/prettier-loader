@@ -125,16 +125,28 @@ module.exports = {
         test: /\.jsx?$/,
         use: {
           loader: 'prettier-loader',
+
           // force this loader to run first if it's not first in loaders list
           enforce: 'pre',
+
           // avoid running prettier on all the files!
           // use it only on your source code and not on dependencies!
           exclude: /node_modules/,
+          
+          // additional prettier options assigned to options in
+          // - .prettierrc,
+          // - prettier.config.js,
+          // - "prettier" property in package.json
           options: {
-            // additional prettier options assigned to options in
-            // - .prettierrc,
-            // - prettier.config.js,
-            // - "prettier" property in package.json
+            trailingComma: 'es5',
+            tabWidth: 4,
+            
+            // additional options object for resolveConfig method
+            // @see https://prettier.io/docs/en/api.html#prettierresolveconfigfilepath-options
+            resolveConfigOptions: {
+              editorconfig: true,
+              config: 'config/prettier.config.js'
+            },
           },
         }
       }
