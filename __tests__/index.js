@@ -34,7 +34,7 @@ function prepare(webpackConfiguration, files, entryFileName) {
     webpack(
       Object.assign({}, webpackConfiguration, {
         entry: `.${SEPARATOR}${entryFileName}`,
-        output: { path: testFolder },
+        output: { path: `${testFolder}${SEPARATOR}prettierLoaderProcessed` },
       })
     ).run((error, stats) => {
       if (error) {
@@ -176,6 +176,36 @@ describe('pass options', () => {
         Object.assign({}, prettierrcOptions, loaderOptions)
       )
     ).toBe(true);
+  });
+
+  test('should not rewrite entry file when skipRewritingSource is true', async () => {
+    const entryFile = 'index.js';
+
+    const prettierOptions = { tabWidth: 8 };
+
+    const files = {
+      [entryFile]: `${'very().'.repeat(20)}long("chaining")`,
+    };
+
+    const webpackConfiguration = getWebpackConfigWithRules([
+      {
+        test: /\.js$/,
+        use: {
+          loader,
+          options: Object.assign({}, prettierOptions, {
+            skipRewritingSource: true,
+          }),
+        },
+      },
+    ]);
+
+    const testFiles = await prepare(webpackConfiguration, files, entryFile);
+    const entryPath = Object.keys(testFiles)[0];
+    const entryContent = getContent(entryPath);
+    // entry file is not processed
+    expect(prettier.check(entryContent)).toBe(false);
+    // entry file is left unchanged
+    expect(entryContent === testFiles[entryPath]).toBe(true);
   });
 });
 

@@ -147,8 +147,46 @@ module.exports = {
               editorconfig: true,
               config: 'config/prettier.config.js'
             },
+
+            // skip rewriting source file.
+            // if true, only prettier the output
+            skipRewritingSource: false,
           },
         }
+      }
+    ]
+  }
+};
+```
+
+### Working with HTML preprocessor
+
+If ou work with HTML preprocessor (Twig, EJS, Nunjucks, ...), you may want to process the output stream.
+Still you don't want the input template to be rewritten with the output.
+In that case, you'll need to tell the loader to keep the source file unchanged.
+
+```js
+// webpack.config.js
+module.exports = {
+  // ...
+  module: {
+    rules: [
+      {
+        test: /\.jsx?$/,
+        use: [
+          {
+            loader: 'html-loader',
+          },
+          {
+            loader: 'prettier-loader',
+            options: {
+              skipRewritingSource: true,
+            },
+          },
+          {
+            loader: 'nunjucks-html-loader',
+          },
+        ],
       }
     ]
   }
