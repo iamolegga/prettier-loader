@@ -14,6 +14,11 @@ const __clearIgnoreManager = require('../prettier-loader').__clearIgnoreManager;
 let testFolder;
 const SEPARATOR = path.sep;
 const loader = path.resolve(__dirname, '..', 'prettier-loader.js');
+const checkOutputLoader = path.resolve(
+  __dirname,
+  'utils',
+  'check-output-loader.js'
+);
 const testsParentFolder = path.join(
   __dirname,
   '..',
@@ -34,7 +39,7 @@ function prepare(webpackConfiguration, files, entryFileName) {
     webpack(
       Object.assign({}, webpackConfiguration, {
         entry: `.${SEPARATOR}${entryFileName}`,
-        output: { path: `${testFolder}${SEPARATOR}prettierLoaderProcessed` },
+        output: { path: testFolder },
       })
     ).run((error, stats) => {
       if (error) {
@@ -187,15 +192,25 @@ describe('pass options', () => {
       [entryFile]: `${'very().'.repeat(20)}long("chaining")`,
     };
 
+    const mockCheckResult = jest.fn();
+
     const webpackConfiguration = getWebpackConfigWithRules([
       {
         test: /\.js$/,
-        use: {
-          loader,
-          options: Object.assign({}, prettierOptions, {
-            skipRewritingSource: true,
-          }),
-        },
+        use: [
+          {
+            loader: checkOutputLoader,
+            options: {
+              checkResult: mockCheckResult,
+            },
+          },
+          {
+            loader,
+            options: Object.assign({}, prettierOptions, {
+              skipRewritingSource: true,
+            }),
+          },
+        ],
       },
     ]);
 
@@ -203,9 +218,15 @@ describe('pass options', () => {
     const entryPath = Object.keys(testFiles)[0];
     const entryContent = getContent(entryPath);
     // entry file is not processed
-    expect(prettier.check(entryContent)).toBe(false);
+    expect(prettier.check(entryContent, prettierOptions)).toBe(false);
     // entry file is left unchanged
     expect(entryContent === testFiles[entryPath]).toBe(true);
+    // output stream is changed
+    expect(mockCheckResult.mock.calls.length).toBe(1);
+    expect(mockCheckResult.mock.calls[0][0]).not.toBe(entryContent);
+    expect(
+      prettier.check(mockCheckResult.mock.calls[0][0], prettierOptions)
+    ).toBe(true);
   });
 });
 

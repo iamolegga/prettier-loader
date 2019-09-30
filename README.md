@@ -172,7 +172,7 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.jsx?$/,
+        test: /\.njk?$/,
         use: [
           {
             loader: 'html-loader',
