@@ -74,7 +74,7 @@ module.exports = async function(source, map) {
     return callback(null, source, map);
   }
 
-  const config = await getConfig(
+  const { skipRewritingSource, ...config } = await getConfig(
     this.resourcePath,
     loaderUtils.getOptions(this)
   );
@@ -86,7 +86,7 @@ module.exports = async function(source, map) {
     return callback(e);
   }
 
-  if (prettierSource !== source) {
+  if (!skipRewritingSource && prettierSource !== source) {
     try {
       fs.writeFileSync(this.resourcePath, prettierSource);
     } catch (error) {
