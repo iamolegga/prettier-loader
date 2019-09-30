@@ -1,5 +1,4 @@
 var fs = require('fs');
-var os = require('os');
 var path = require('path');
 var prettier = require('prettier');
 // eslint-disable-next-line node/no-unpublished-require
@@ -14,12 +13,17 @@ var __clearIgnoreManager = require('../prettier-loader').__clearIgnoreManager;
 
 var SEPARATOR = path.sep;
 var testFolder;
+var loader = path.resolve(__dirname, '..', 'prettier-loader.js');
+var testsParentFolder = path.join(
+  __dirname,
+  '..',
+  '..',
+  'prettier-loader-tests'
+);
 
 function prepare(webpackConfiguration, files, entryFileName) {
-  testFolder = fs.mkdtempSync(`${os.tmpdir()}${SEPARATOR}`);
-
   var testFiles = Object.keys(files).reduce((acc, fileName) => {
-    var fullPath = `${testFolder}${SEPARATOR}${fileName}`;
+    var fullPath = path.join(testFolder, fileName);
     var content = files[fileName];
     fs.writeFileSync(fullPath, content);
     acc[fullPath] = content;
@@ -29,7 +33,7 @@ function prepare(webpackConfiguration, files, entryFileName) {
   return new Promise((resolve, reject) => {
     webpack(
       Object.assign({}, webpackConfiguration, {
-        entry: `${testFolder}${SEPARATOR}${entryFileName}`,
+        entry: `.${SEPARATOR}${entryFileName}`,
         output: { path: testFolder },
       })
     ).run((error, stats) => {
@@ -47,9 +51,8 @@ function prepare(webpackConfiguration, files, entryFileName) {
 
 function getWebpackConfigWithRules(rules) {
   return {
-    context: '/',
+    context: testFolder,
     module: { rules },
-    resolveLoader: { modules: [path.join(__dirname, '..'), 'node_modules'] },
   };
 }
 
@@ -60,6 +63,18 @@ function getContent(path) {
 /**
  * Tests settings
  */
+
+beforeAll(() => {
+  fs.mkdirSync(testsParentFolder);
+});
+
+afterAll(() => {
+  rimraf.sync(testsParentFolder);
+});
+
+beforeEach(() => {
+  testFolder = fs.mkdtempSync(`${testsParentFolder}${SEPARATOR}`);
+});
 
 afterEach(() => {
   rimraf.sync(testFolder);
@@ -82,7 +97,7 @@ describe('pass options', () => {
     };
 
     var webpackConfiguration = getWebpackConfigWithRules([
-      { test: /\.js$/, use: { loader: 'prettier-loader' } },
+      { test: /\.js$/, use: { loader } },
     ]);
 
     return prepare(webpackConfiguration, files, entryFile).then(testFiles => {
@@ -105,7 +120,7 @@ describe('pass options', () => {
     var webpackConfiguration = getWebpackConfigWithRules([
       {
         test: /\.js$/,
-        use: { loader: 'prettier-loader', options: prettierOptions },
+        use: { loader, options: prettierOptions },
       },
     ]);
 
@@ -128,7 +143,7 @@ describe('pass options', () => {
     };
 
     var webpackConfiguration = getWebpackConfigWithRules([
-      { test: /\.js$/, use: { loader: 'prettier-loader' } },
+      { test: /\.js$/, use: { loader } },
     ]);
 
     return prepare(webpackConfiguration, files, entryFile).then(testFiles => {
@@ -154,7 +169,7 @@ describe('pass options', () => {
     var webpackConfiguration = getWebpackConfigWithRules([
       {
         test: /\.js$/,
-        use: { loader: 'prettier-loader', options: loaderOptions },
+        use: { loader, options: loaderOptions },
       },
     ]);
 
@@ -190,7 +205,7 @@ ${MATRIX_CODE}`,
     };
 
     var webpackConfiguration = getWebpackConfigWithRules([
-      { test: /\.js$/, use: { loader: 'prettier-loader' } },
+      { test: /\.js$/, use: { loader } },
     ]);
 
     return prepare(webpackConfiguration, files, entryFile).then(testFiles => {
@@ -210,7 +225,7 @@ ${MATRIX_CODE}`,
     };
 
     var webpackConfiguration = getWebpackConfigWithRules([
-      { test: /\.js$/, use: { loader: 'prettier-loader' } },
+      { test: /\.js$/, use: { loader } },
     ]);
 
     return prepare(webpackConfiguration, files, entryFile).then(testFiles => {

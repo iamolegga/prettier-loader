@@ -31,10 +31,7 @@ function getIgnoreManager(filePath) {
   ignoreManager = ignore();
   var ignorePath = findIgnorePathInParentFolders(path.join(filePath, '..'));
   if (ignorePath) {
-    var ignoredFiles = fs
-      .readFileSync(ignorePath, 'utf8')
-      .toString()
-      .split('\n');
+    var ignoredFiles = fs.readFileSync(ignorePath, 'utf8').toString();
     ignoreManager.add(ignoredFiles);
   }
   return ignoreManager;
@@ -59,7 +56,11 @@ module.exports = function(source, map) {
     return callback(null, source, map);
   }
 
-  if (getIgnoreManager(this.resourcePath).ignores(this.resourcePath)) {
+  if (
+    getIgnoreManager(this.resourcePath).ignores(
+      path.relative(this.rootContext, this.resourcePath)
+    )
+  ) {
     return callback(null, source, map);
   }
 

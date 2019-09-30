@@ -4,7 +4,7 @@
   "description": "webpack prettier loader",
   "main": "prettier-loader.js",
   "engines": {
-    "node": ">=4.0.0"
+    "node": ">=8.0.0"
   },
   "scripts": {
     "lint": "prettier --write index.js && eslint index.js --fix && prettier --write prettier-loader.js && eslint prettier-loader.js --fix && prettier --write __tests__/index.js && eslint __tests__/index.js --fix",
@@ -26,23 +26,23 @@
   },
   "homepage": "https://github.com/iamolegga/prettier-loader#readme",
   "dependencies": {
-    "ignore": "^4.0.6",
-    "loader-utils": "^1.1.0"
+    "ignore": "^5.1.4",
+    "loader-utils": "^1.2.3"
   },
   "devDependencies": {
-    "coveralls": "^3.0.0",
-    "eslint": "^4.8.0",
-    "eslint-config-prettier": "^2.6.0",
-    "eslint-plugin-node": "^5.2.0",
-    "eslint-plugin-prettier": "^2.3.1",
-    "jest": "^21.2.1",
-    "prettier": "^1.6.1",
-    "rimraf": "^2.6.2",
-    "webpack": "^2.2.0"
+    "coveralls": "^3.0.6",
+    "eslint": "^6.5.0",
+    "eslint-config-prettier": "^6.3.0",
+    "eslint-plugin-node": "^10.0.0",
+    "eslint-plugin-prettier": "^3.1.1",
+    "jest": "^24.9.0",
+    "prettier": "^1.18.2",
+    "rimraf": "^3.0.0",
+    "webpack": "^4.41.0"
   },
   "peerDependencies": {
-    "prettier": ">=1.6.1",
-    "webpack": ">=2.2.0"
+    "prettier": ">=1.6.0",
+    "webpack": ">=2.0.0"
   },
   "jest": {
     "testEnvironment": "node",
