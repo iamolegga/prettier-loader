@@ -1,6 +1,6 @@
 {
   "name": "prettier-loader",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "webpack prettier loader",
   "main": "prettier-loader.js",
   "engines": {
@@ -47,6 +47,8 @@
   "jest": {
     "testEnvironment": "node",
     "collectCoverage": true,
-    "testPathIgnorePatterns": ["__tests__/utils"]
+    "testPathIgnorePatterns": [
+      "__tests__/utils"
+    ]
   }
 }
