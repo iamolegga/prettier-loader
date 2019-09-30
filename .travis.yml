@@ -1,17 +1,17 @@
 language: node_js
 cache:
   directories:
-  - node_modules
+    - node_modules
 notifications:
   email: false
 node_js:
-  - "4"
+  - '8.3.0'
 script:
-- npm run test
-- |
-  if [[ ( "$TRAVIS_BRANCH" == "master" ) && ( "$TRAVIS_PULL_REQUEST" == "false" ) ]]; then
-    npm run report;
-  fi
+  - npm run test
+  - |
+    if [[ ( "$TRAVIS_BRANCH" == "master" ) && ( "$TRAVIS_PULL_REQUEST" == "false" ) ]]; then
+      npm run report;
+    fi
 branches:
   except:
-  - /^v\d+\.\d+\.\d+$/
+    - /^v\d+\.\d+\.\d+$/

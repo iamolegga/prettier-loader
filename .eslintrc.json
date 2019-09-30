@@ -3,5 +3,8 @@
   "extends": ["eslint:recommended", "plugin:node/recommended", "prettier"],
   "env": {
     "jest": true
+  },
+  "rules": {
+    "no-unused-vars": ["error", { "ignoreRestSiblings": true }]
   }
 }

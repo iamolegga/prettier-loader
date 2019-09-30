@@ -1,87 +1,103 @@
-var fs = require('fs');
-var path = require('path');
-var prettier = require('prettier');
-var loaderUtils = require('loader-utils');
-var ignore = require('ignore');
+const fs = require('fs');
+const path = require('path');
+const prettier = require('prettier');
+const loaderUtils = require('loader-utils');
+const ignore = require('ignore');
 
 // prettier config
 
-var configsCache = {};
-function getConfig(filePath, loaderOptions) {
+const configsCache = {};
+async function getConfig(filePath, loaderOptions) {
   if (configsCache[filePath]) {
-    return Promise.resolve(configsCache[filePath]);
+    return configsCache[filePath];
   }
-  return prettier
-    .resolveConfig(filePath, (loaderOptions || {}).resolveConfigOptions)
-    .then(config => {
-      var mergedConfig = Object.assign({}, config || {}, loaderOptions);
-      delete mergedConfig.resolveConfigOptions;
-      configsCache[filePath] = mergedConfig;
-      return mergedConfig;
-    });
+
+  const config = await prettier.resolveConfig(
+    filePath,
+    (loaderOptions || {}).resolveConfigOptions
+  );
+
+  const { resolveConfigOptions: _, ...mergedConfig } = Object.assign(
+    {},
+    config || {},
+    loaderOptions
+  );
+
+  // eslint-disable-next-line require-atomic-updates
+  configsCache[filePath] = mergedConfig;
+
+  return mergedConfig;
 }
 
 // prettier ignore
 
-var ignoreManager;
+let ignoreManager;
 function getIgnoreManager(filePath) {
   if (ignoreManager) {
     return ignoreManager;
   }
   ignoreManager = ignore();
-  var ignorePath = findIgnorePathInParentFolders(path.join(filePath, '..'));
+  const ignorePath = findIgnorePathInParentFolders(path.join(filePath, '..'));
   if (ignorePath) {
-    var ignoredFiles = fs
-      .readFileSync(ignorePath, 'utf8')
-      .toString()
-      .split('\n');
+    const ignoredFiles = fs.readFileSync(ignorePath, 'utf8').toString();
     ignoreManager.add(ignoredFiles);
   }
   return ignoreManager;
 }
 function findIgnorePathInParentFolders(folderPath) {
-  var possiblePath = path.join(`${folderPath}`, '.prettierignore');
+  const possiblePath = path.join(`${folderPath}`, '.prettierignore');
   if (fs.existsSync(possiblePath)) {
     return possiblePath;
   }
-  var parentFolder = path.join(folderPath, '..');
+  const parentFolder = path.join(folderPath, '..');
   if (parentFolder === folderPath) {
     return null;
   }
   return findIgnorePathInParentFolders(parentFolder);
 }
 
-module.exports = function(source, map) {
+// loader
+
+module.exports = async function(source, map) {
   this.cacheable();
-  var callback = this.async();
+  const callback = this.async();
 
   if (!new RegExp(this.query.test).test(this.context)) {
     return callback(null, source, map);
   }
 
-  if (getIgnoreManager(this.resourcePath).ignores(this.resourcePath)) {
+  if (
+    getIgnoreManager(this.resourcePath).ignores(
+      path.relative(this.rootContext, this.resourcePath)
+    )
+  ) {
     return callback(null, source, map);
   }
 
-  getConfig(this.resourcePath, loaderUtils.getOptions(this)).then(config => {
-    var prettierSource;
+  const config = await getConfig(
+    this.resourcePath,
+    loaderUtils.getOptions(this)
+  );
+
+  let prettierSource;
+  try {
+    prettierSource = prettier.format(source, config);
+  } catch (e) {
+    return callback(e);
+  }
+
+  if (prettierSource !== source) {
     try {
-      prettierSource = prettier.format(source, config);
-    } catch (e) {
-      return callback(e);
+      fs.writeFileSync(this.resourcePath, prettierSource);
+    } catch (error) {
+      return callback(error);
     }
+  }
 
-    if (prettierSource !== source) {
-      try {
-        fs.writeFileSync(this.resourcePath, prettierSource);
-      } catch (error) {
-        return callback(error);
-      }
-    }
-
-    callback(null, prettierSource, map);
-  });
+  callback(null, prettierSource, map);
 };
+
+// for tests
 
 module.exports.__clearIgnoreManager = () => {
   ignoreManager = undefined;
