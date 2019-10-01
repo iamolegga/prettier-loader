@@ -12,15 +12,18 @@ async function getConfig(filePath, loaderOptions) {
     return configsCache[filePath];
   }
 
-  const config = await prettier.resolveConfig(
+  const { watch: _, resolveConfigOptions, ...passedToLoaderOptions } =
+    loaderOptions || {};
+
+  const outerOptions = await prettier.resolveConfig(
     filePath,
-    (loaderOptions || {}).resolveConfigOptions
+    resolveConfigOptions
   );
 
-  const { resolveConfigOptions: _, ...mergedConfig } = Object.assign(
+  const { ...mergedConfig } = Object.assign(
     {},
-    config || {},
-    loaderOptions
+    outerOptions || {},
+    passedToLoaderOptions
   );
 
   // eslint-disable-next-line require-atomic-updates
@@ -68,7 +71,9 @@ module.exports = async function(source, map) {
 
   if (
     getIgnoreManager(this.resourcePath).ignores(
-      path.relative(this.rootContext, this.resourcePath)
+      // webpack4 specific `rootContext` property against `options.context`
+      // in earlier versions
+      path.relative(this.rootContext || this.options.context, this.resourcePath)
     )
   ) {
     return callback(null, source, map);
@@ -95,6 +100,23 @@ module.exports = async function(source, map) {
   }
 
   callback(null, prettierSource, map);
+};
+
+module.exports.pitch = function() {
+  if ((loaderUtils.getOptions(this) || {}).watch) {
+    if (!global.prettierLoaderWatchCache) {
+      this.emitWarning(
+        new Error(
+          `Add 'prettier-loader/watch-helper' to cancel double build on change\n` +
+            `Read here: ${require('./package.json').homepage}`
+        )
+      );
+    } else if (global.prettierLoaderWatchCache.has(this.resourcePath)) {
+      var result = global.prettierLoaderWatchCache.get(this.resourcePath);
+      global.prettierLoaderWatchCache.delete(this.resourcePath);
+      return result;
+    }
+  }
 };
 
 // for tests
