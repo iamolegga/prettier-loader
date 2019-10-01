@@ -160,6 +160,46 @@ module.exports = {
 };
 ```
 
+### Watch mode
+
+2 examples above fit for case, when you run webpack not in watch mode, because in watch-mode there is a double writing source file (by user, and after watching change made by prettier-loader). But there is workaround:
+
+```js
+// webpack.config.js
+module.exports = {
+  // ...
+  module: {
+    rules: [
+      // prettier-loader as in example above
+      {
+        test: /\.jsx?$/,
+        use: {
+          loader: 'prettier-loader',
+          enforce: 'pre',
+          exclude: /node_modules/,
+        }
+      },
+
+      // other loaders...
+
+      // and tiny helper loader, that caches the result of all loaders
+      // for prettier-loader to pitch cached result to webpack
+      // without running new build after changing source file by prettier
+      {
+        test: /\.jsx?$/,
+        use: {
+          loader: 'prettier-loader/watch-helper',
+          // make shure that it is the last loader in chain,
+          // because it must cache result of the whole chain
+          enforce: 'post',
+          exclude: /node_modules/,
+        }
+      }
+    ]
+  }
+};
+```
+
 ### Working with HTML preprocessor
 
 If ou work with HTML preprocessor (Twig, EJS, Nunjucks, ...), you may want to process the output stream.
