@@ -377,7 +377,6 @@ for (const webpack of engines) {
 
         let changesCount = 0;
         const cb = (error, stats, watchFiles) => {
-          console.log({ stats, watchFiles });
           if (changesCount == 0) {
             resolveFirstChangeWaiting();
             fs.writeFileSync(Object.keys(watchFiles)[0], MATRIX_CODE);
