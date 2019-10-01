@@ -6,6 +6,7 @@
 
 [![Travis][travis-badge]][travis]
 [![Coverage Status][coveralls-badge]][coveralls]
+[![Snyk Vulnerabilities for npm package][snyk-badge]][snyk]
 [![version][version-badge]][package]
 [![downloads][downloads-badge]][npmcharts]
 [![Node version support][node-version]][package]
@@ -233,6 +234,8 @@ SOFTWARE.
 [travis]: https://travis-ci.org/iamolegga/prettier-loader
 [coveralls-badge]: https://img.shields.io/coveralls/github/iamolegga/prettier-loader.svg?style=flat-square
 [coveralls]: https://coveralls.io/github/iamolegga/prettier-loader?branch=master
+[snyk-badge]: https://img.shields.io/snyk/vulnerabilities/npm/prettier-loader
+[snyk]: https://snyk.io/test/github/iamolegga/prettier-loader
 [version-badge]: https://img.shields.io/npm/v/prettier-loader.svg?style=flat-square
 [package]: https://www.npmjs.com/package/prettier-loader
 [downloads-badge]: https://img.shields.io/npm/dm/prettier-loader.svg?style=flat-square
