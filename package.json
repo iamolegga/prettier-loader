@@ -51,6 +51,9 @@
     "collectCoverage": true,
     "testPathIgnorePatterns": [
       "__tests__/utils"
+    ],
+    "collectCoverageFrom": [
+      "./prettier-loader.js"
     ]
   }
 }

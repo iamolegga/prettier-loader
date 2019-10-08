@@ -1,11 +1,22 @@
 const fs = require('fs');
 const path = require('path');
 const prettier = require('prettier');
-// eslint-disable-next-line node/no-unpublished-require
 const rimraf = require('rimraf');
-// eslint-disable-next-line node/no-unpublished-require
-const webpack = require('webpack');
+const webpack4 = require('webpack');
+const webpack3 = require('webpack3');
+const webpack2 = require('webpack2');
 const __clearIgnoreManager = require('../prettier-loader').__clearIgnoreManager;
+
+/**
+ * Loaders
+ */
+
+const loader = path.resolve(__dirname, '..', 'prettier-loader.js');
+const checkOutputLoader = path.resolve(
+  __dirname,
+  'utils',
+  'check-output-loader.js'
+);
 
 /**
  * Helpers
@@ -13,12 +24,6 @@ const __clearIgnoreManager = require('../prettier-loader').__clearIgnoreManager;
 
 let testFolder;
 const SEPARATOR = path.sep;
-const loader = path.resolve(__dirname, '..', 'prettier-loader.js');
-const checkOutputLoader = path.resolve(
-  __dirname,
-  'utils',
-  'check-output-loader.js'
-);
 const testsParentFolder = path.join(
   __dirname,
   '..',
@@ -26,7 +31,7 @@ const testsParentFolder = path.join(
   'prettier-loader-tests'
 );
 
-function prepare(webpackConfiguration, files, entryFileName) {
+function prepare(engine, webpackConfiguration, files, entryFileName) {
   const testFiles = Object.keys(files).reduce((acc, fileName) => {
     const fullPath = path.join(testFolder, fileName);
     const content = files[fileName];
@@ -36,7 +41,7 @@ function prepare(webpackConfiguration, files, entryFileName) {
   }, {});
 
   return new Promise((resolve, reject) => {
-    webpack(
+    engine(
       Object.assign({}, webpackConfiguration, {
         entry: `.${SEPARATOR}${entryFileName}`,
         output: { path: testFolder },
@@ -66,10 +71,23 @@ function getContent(path) {
 }
 
 /**
+ * Code examples
+ */
+
+const MATRIX_CODE = `matrix(
+  1, 0, 0,
+  0, 1, 0,
+  0, 0, 1
+)`;
+
+const CHAINING_CODE = `${'very().'.repeat(20)}long("chaining")`;
+
+/**
  * Tests settings
  */
 
 beforeAll(() => {
+  rimraf.sync(testsParentFolder);
   fs.mkdirSync(testsParentFolder);
 });
 
@@ -89,189 +107,216 @@ afterEach(() => {
   __clearIgnoreManager();
 });
 
+const engines = [webpack4, webpack3, webpack2];
+let currentVersion = 4;
+
 /**
  * Tests
  */
 
-describe('pass options', () => {
-  test('should work without loader-options and .prettierrc file', async () => {
-    const entryFile = 'index.js';
+for (const webpack of engines) {
+  describe(`testing against webpack@${currentVersion--}`, () => {
+    describe('pass options', () => {
+      test('should work without loader-options and .prettierrc file', async () => {
+        const entryFile = 'index.js';
+        const files = { [entryFile]: CHAINING_CODE };
 
-    const files = {
-      [entryFile]: `${'very().'.repeat(20)}long("chaining")`,
-    };
+        const webpackConfiguration = getWebpackConfigWithRules([
+          { test: /\.js$/, use: { loader } },
+        ]);
 
-    const webpackConfiguration = getWebpackConfigWithRules([
-      { test: /\.js$/, use: { loader } },
-    ]);
+        const testFiles = await prepare(
+          webpack,
+          webpackConfiguration,
+          files,
+          entryFile
+        );
+        const entryPath = Object.keys(testFiles)[0];
+        const entryContent = getContent(entryPath);
+        expect(prettier.check(entryContent)).toBe(true);
+      });
 
-    const testFiles = await prepare(webpackConfiguration, files, entryFile);
-    const entryPath = Object.keys(testFiles)[0];
-    const entryContent = getContent(entryPath);
-    expect(prettier.check(entryContent)).toBe(true);
-  });
+      test('should work with loader-options', async () => {
+        const entryFile = 'index.js';
 
-  test('should work with loader-options', async () => {
-    const entryFile = 'index.js';
+        const prettierOptions = { tabWidth: 8 };
 
-    const prettierOptions = { tabWidth: 8 };
+        const files = { [entryFile]: CHAINING_CODE };
 
-    const files = {
-      [entryFile]: `${'very().'.repeat(20)}long("chaining")`,
-    };
+        const webpackConfiguration = getWebpackConfigWithRules([
+          { test: /\.js$/, use: { loader, options: prettierOptions } },
+        ]);
 
-    const webpackConfiguration = getWebpackConfigWithRules([
-      {
-        test: /\.js$/,
-        use: { loader, options: prettierOptions },
-      },
-    ]);
+        const testFiles = await prepare(
+          webpack,
+          webpackConfiguration,
+          files,
+          entryFile
+        );
+        const entryPath = Object.keys(testFiles)[0];
+        const entryContent = getContent(entryPath);
+        expect(prettier.check(entryContent, prettierOptions)).toBe(true);
+      });
 
-    const testFiles = await prepare(webpackConfiguration, files, entryFile);
-    const entryPath = Object.keys(testFiles)[0];
-    const entryContent = getContent(entryPath);
-    expect(prettier.check(entryContent, prettierOptions)).toBe(true);
-  });
+      test('should work with .prettierrc file', async () => {
+        const entryFile = 'index.js';
 
-  test('should work with .prettierrc file', async () => {
-    const entryFile = 'index.js';
+        const prettierOptions = { tabWidth: 8 };
 
-    const prettierOptions = { tabWidth: 8 };
+        const files = {
+          [entryFile]: CHAINING_CODE,
+          '.prettierrc': JSON.stringify(prettierOptions),
+        };
 
-    const files = {
-      [entryFile]: `${'very().'.repeat(20)}long("chaining")`,
-      '.prettierrc': JSON.stringify(prettierOptions),
-    };
+        const webpackConfiguration = getWebpackConfigWithRules([
+          { test: /\.js$/, use: { loader } },
+        ]);
 
-    const webpackConfiguration = getWebpackConfigWithRules([
-      { test: /\.js$/, use: { loader } },
-    ]);
+        const testFiles = await prepare(
+          webpack,
+          webpackConfiguration,
+          files,
+          entryFile
+        );
+        const entryPath = Object.keys(testFiles).find(k =>
+          k.includes(entryFile)
+        );
+        const entryContent = getContent(entryPath);
+        expect(prettier.check(entryContent, prettierOptions)).toBe(true);
+      });
 
-    const testFiles = await prepare(webpackConfiguration, files, entryFile);
-    const entryPath = Object.keys(testFiles).find(k => k.includes(entryFile));
-    const entryContent = getContent(entryPath);
-    expect(prettier.check(entryContent, prettierOptions)).toBe(true);
-  });
+      test('should work with loader-options and .prettierrc file', async () => {
+        const entryFile = 'index.js';
 
-  test('should work with loader-options and .prettierrc file', async () => {
-    const entryFile = 'index.js';
+        // create both, but loader rules should override prettierrc
+        const prettierrcOptions = { tabWidth: 8, singleQuote: true };
+        const loaderOptions = { tabWidth: 4 };
 
-    // create both, but loader rules should override prettierrc
-    const prettierrcOptions = { tabWidth: 8, singleQuote: true };
-    const loaderOptions = { tabWidth: 4 };
+        const files = {
+          [entryFile]: CHAINING_CODE,
+          '.prettierrc': JSON.stringify(prettierrcOptions),
+        };
 
-    const files = {
-      [entryFile]: `${'very().'.repeat(20)}long("chaining")`,
-      '.prettierrc': JSON.stringify(prettierrcOptions),
-    };
+        const webpackConfiguration = getWebpackConfigWithRules([
+          { test: /\.js$/, use: { loader, options: loaderOptions } },
+        ]);
 
-    const webpackConfiguration = getWebpackConfigWithRules([
-      {
-        test: /\.js$/,
-        use: { loader, options: loaderOptions },
-      },
-    ]);
+        const testFiles = await prepare(
+          webpack,
+          webpackConfiguration,
+          files,
+          entryFile
+        );
+        const entryPath = Object.keys(testFiles).find(k =>
+          k.includes(entryFile)
+        );
+        const entryContent = getContent(entryPath);
+        expect(
+          prettier.check(
+            entryContent,
+            Object.assign({}, prettierrcOptions, loaderOptions)
+          )
+        ).toBe(true);
+      });
 
-    const testFiles = await prepare(webpackConfiguration, files, entryFile);
-    const entryPath = Object.keys(testFiles).find(k => k.includes(entryFile));
-    const entryContent = getContent(entryPath);
-    expect(
-      prettier.check(
-        entryContent,
-        Object.assign({}, prettierrcOptions, loaderOptions)
-      )
-    ).toBe(true);
-  });
+      test('should not rewrite entry file when skipRewritingSource is true', async () => {
+        const entryFile = 'index.js';
 
-  test('should not rewrite entry file when skipRewritingSource is true', async () => {
-    const entryFile = 'index.js';
+        const prettierOptions = { tabWidth: 8 };
 
-    const prettierOptions = { tabWidth: 8 };
+        const files = { [entryFile]: CHAINING_CODE };
 
-    const files = {
-      [entryFile]: `${'very().'.repeat(20)}long("chaining")`,
-    };
+        const mockCheckResult = jest.fn();
 
-    const mockCheckResult = jest.fn();
-
-    const webpackConfiguration = getWebpackConfigWithRules([
-      {
-        test: /\.js$/,
-        use: [
+        const webpackConfiguration = getWebpackConfigWithRules([
           {
-            loader: checkOutputLoader,
-            options: {
-              checkResult: mockCheckResult,
-            },
+            test: /\.js$/,
+            use: [
+              {
+                loader: checkOutputLoader,
+                options: { checkResult: mockCheckResult },
+              },
+              {
+                loader,
+                options: { ...prettierOptions, skipRewritingSource: true },
+              },
+            ],
           },
-          {
-            loader,
-            options: Object.assign({}, prettierOptions, {
-              skipRewritingSource: true,
-            }),
-          },
-        ],
-      },
-    ]);
+        ]);
 
-    const testFiles = await prepare(webpackConfiguration, files, entryFile);
-    const entryPath = Object.keys(testFiles)[0];
-    const entryContent = getContent(entryPath);
-    // entry file is not processed
-    expect(prettier.check(entryContent, prettierOptions)).toBe(false);
-    // entry file is left unchanged
-    expect(entryContent === testFiles[entryPath]).toBe(true);
-    // output stream is changed
-    expect(mockCheckResult.mock.calls.length).toBe(1);
-    expect(mockCheckResult.mock.calls[0][0]).not.toBe(entryContent);
-    expect(
-      prettier.check(mockCheckResult.mock.calls[0][0], prettierOptions)
-    ).toBe(true);
-  });
-});
+        const testFiles = await prepare(
+          webpack,
+          webpackConfiguration,
+          files,
+          entryFile
+        );
+        const entryPath = Object.keys(testFiles)[0];
+        const entryContent = getContent(entryPath);
+        // entry file is not processed
+        expect(prettier.check(entryContent, prettierOptions)).toBe(false);
+        // entry file is left unchanged
+        expect(entryContent === testFiles[entryPath]).toBe(true);
+        // output stream is changed
+        expect(mockCheckResult.mock.calls.length).toBe(1);
+        expect(mockCheckResult.mock.calls[0][0]).not.toBe(entryContent);
+        expect(
+          prettier.check(mockCheckResult.mock.calls[0][0], prettierOptions)
+        ).toBe(true);
+      });
+    });
 
-describe('ignoring', () => {
-  const MATRIX_CODE = `matrix(
-    1, 0, 0,
-    0, 1, 0,
-    0, 0, 1
-  )`;
+    describe('ignoring', () => {
+      test('should ignore using comments', async () => {
+        const entryFile = 'index.js';
 
-  test('should ignore using comments', async () => {
-    const entryFile = 'index.js';
-
-    const files = {
-      [entryFile]: `
-${'very().'.repeat(20)}long("chaining")
+        const files = {
+          [entryFile]: `
+${CHAINING_CODE}
 // prettier-ignore
 ${MATRIX_CODE}`,
-    };
+        };
 
-    const webpackConfiguration = getWebpackConfigWithRules([
-      { test: /\.js$/, use: { loader } },
-    ]);
+        const webpackConfiguration = getWebpackConfigWithRules([
+          { test: /\.js$/, use: { loader } },
+        ]);
 
-    const testFiles = await prepare(webpackConfiguration, files, entryFile);
-    const entryPath = Object.keys(testFiles).find(k => k.includes(entryFile));
-    const entryContent = getContent(entryPath);
-    expect(entryContent).toMatch(MATRIX_CODE);
+        const testFiles = await prepare(
+          webpack,
+          webpackConfiguration,
+          files,
+          entryFile
+        );
+        const entryPath = Object.keys(testFiles).find(k =>
+          k.includes(entryFile)
+        );
+        const entryContent = getContent(entryPath);
+        expect(entryContent).toMatch(MATRIX_CODE);
+      });
+
+      test('should ignore using .prettierignore', async () => {
+        const entryFile = 'index.js';
+
+        const files = {
+          [entryFile]: MATRIX_CODE,
+          '.prettierignore': entryFile,
+        };
+
+        const webpackConfiguration = getWebpackConfigWithRules([
+          { test: /\.js$/, use: { loader } },
+        ]);
+
+        const testFiles = await prepare(
+          webpack,
+          webpackConfiguration,
+          files,
+          entryFile
+        );
+        const entryPath = Object.keys(testFiles).find(k =>
+          k.includes(entryFile)
+        );
+        const entryContent = getContent(entryPath);
+        expect(entryContent).toMatch(MATRIX_CODE);
+      });
+    });
   });
-
-  test('should ignore using .prettierignore', async () => {
-    const entryFile = 'index.js';
-
-    const files = {
-      [entryFile]: MATRIX_CODE,
-      '.prettierignore': entryFile,
-    };
-
-    const webpackConfiguration = getWebpackConfigWithRules([
-      { test: /\.js$/, use: { loader } },
-    ]);
-
-    const testFiles = await prepare(webpackConfiguration, files, entryFile);
-    const entryPath = Object.keys(testFiles).find(k => k.includes(entryFile));
-    const entryContent = getContent(entryPath);
-    expect(entryContent).toMatch(MATRIX_CODE);
-  });
-});
+}
