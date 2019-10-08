@@ -7,20 +7,24 @@ const ignore = require('ignore');
 // prettier config
 
 const configsCache = {};
+
 async function getConfig(filePath, loaderOptions) {
   if (configsCache[filePath]) {
     return configsCache[filePath];
   }
 
-  const config = await prettier.resolveConfig(
+  const { resolveConfigOptions, ...passedToLoaderPrettierOptions } =
+    loaderOptions || {};
+
+  const outerOptions = await prettier.resolveConfig(
     filePath,
-    (loaderOptions || {}).resolveConfigOptions
+    resolveConfigOptions
   );
 
-  const { resolveConfigOptions: _, ...mergedConfig } = Object.assign(
+  const mergedConfig = Object.assign(
     {},
-    config || {},
-    loaderOptions
+    outerOptions || {},
+    passedToLoaderPrettierOptions
   );
 
   // eslint-disable-next-line require-atomic-updates
@@ -32,6 +36,7 @@ async function getConfig(filePath, loaderOptions) {
 // prettier ignore
 
 let ignoreManager;
+
 function getIgnoreManager(filePath) {
   if (ignoreManager) {
     return ignoreManager;
@@ -68,7 +73,9 @@ module.exports = async function(source, map) {
 
   if (
     getIgnoreManager(this.resourcePath).ignores(
-      path.relative(this.rootContext, this.resourcePath)
+      // webpack4 specific `rootContext` property
+      // against `options.context` in earlier versions
+      path.relative(this.rootContext || this.options.context, this.resourcePath)
     )
   ) {
     return callback(null, source, map);

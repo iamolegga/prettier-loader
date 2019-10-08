@@ -7,7 +7,7 @@
     "node": ">=8.3.0"
   },
   "scripts": {
-    "lint": "prettier --write index.js && eslint index.js --fix && prettier --write prettier-loader.js && eslint prettier-loader.js --fix && prettier --write __tests__/index.js && eslint __tests__/index.js --fix",
+    "lint": "eslint '**/*.js' --fix",
     "test": "npm run lint && jest",
     "report": "cat ./coverage/lcov.info | coveralls"
   },
@@ -38,7 +38,9 @@
     "jest": "^24.9.0",
     "prettier": "^1.18.2",
     "rimraf": "^3.0.0",
-    "webpack": "^4.41.0"
+    "webpack": "^4.41.0",
+    "webpack2": "npm:webpack@2",
+    "webpack3": "npm:webpack@3"
   },
   "peerDependencies": {
     "prettier": ">=1.6.0",
@@ -49,6 +51,9 @@
     "collectCoverage": true,
     "testPathIgnorePatterns": [
       "__tests__/utils"
+    ],
+    "collectCoverageFrom": [
+      "./prettier-loader.js"
     ]
   }
 }

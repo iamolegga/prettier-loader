@@ -1,0 +1,9 @@
+__tests__/
+coverage/
+.eslintrc.json
+.prettierrc
+.travis.yml
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
+ISSUE_TEMPLATE.md
+yarn.lock
