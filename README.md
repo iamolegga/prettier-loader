@@ -198,6 +198,10 @@ module.exports = {
 
 Install and use it only in development environment if you minimize code for production, don't do unnecessary work!
 
+## Known issue
+
+As a loader, that is modifying source code, it has [known issue](https://github.com/iamolegga/prettier-loader/issues/1) with double compilation in watch mode. With current `webpack` API this problem can not be solved (the same problem exists in [other](https://github.com/rchaser53/awesome-prettier-loader/issues/3) [similar](https://github.com/webpack-contrib/eslint-loader/issues/303) [projects](https://github.com/hawkins/prettier-webpack-plugin/issues/2)). [Webpack maintainers are not going to help with this](https://github.com/webpack/webpack/issues/9763).
+
 ## Contributing
 
 All pull requests that respect next rules are welcome:
