@@ -152,6 +152,10 @@ module.exports = {
             // skip rewriting source file.
             // if true, only prettier the output
             skipRewritingSource: false,
+
+            // skip prettifying file at startup.
+            // if true, prettier will be triggered after the modification of a file
+            ignoreInitial: false,
           },
         }
       }
@@ -162,7 +166,7 @@ module.exports = {
 
 ### Working with HTML preprocessor
 
-If ou work with HTML preprocessor (Twig, EJS, Nunjucks, ...), you may want to process the output stream.
+If you work with HTML preprocessor (Twig, EJS, Nunjucks, ...), you may want to process the output stream.
 Still you don't want the input template to be rewritten with the output.
 In that case, you'll need to tell the loader to keep the source file unchanged.
 

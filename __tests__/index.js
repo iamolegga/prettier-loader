@@ -221,11 +221,8 @@ for (const webpack of engines) {
 
       test('should not rewrite entry file when skipRewritingSource is true', async () => {
         const entryFile = 'index.js';
-
         const prettierOptions = { tabWidth: 8 };
-
         const files = { [entryFile]: CHAINING_CODE };
-
         const mockCheckResult = jest.fn();
 
         const webpackConfiguration = getWebpackConfigWithRules([
@@ -262,6 +259,48 @@ for (const webpack of engines) {
         expect(
           prettier.check(mockCheckResult.mock.calls[0][0], prettierOptions)
         ).toBe(true);
+      });
+
+      test('should not rewrite at initial loading', async () => {
+        const entryFile = 'index.js';
+        const prettierOptions = { tabWidth: 8 };
+        const files = { [entryFile]: CHAINING_CODE };
+        const mockCheckResult = jest.fn();
+
+        const webpackConfiguration = getWebpackConfigWithRules([
+          {
+            test: /\.js$/,
+            use: [
+              {
+                loader: checkOutputLoader,
+                options: { checkResult: mockCheckResult },
+              },
+              {
+                loader,
+                options: { ...prettierOptions, ignoreInitial: true },
+              },
+            ],
+          },
+        ]);
+
+        const testFiles = await prepare(
+          webpack,
+          webpackConfiguration,
+          files,
+          entryFile
+        );
+        const entryPath = Object.keys(testFiles)[0];
+        const entryContent = getContent(entryPath);
+        // entry file is not processed
+        expect(prettier.check(entryContent, prettierOptions)).toBe(false);
+        // entry file is left unchanged
+        expect(entryContent === testFiles[entryPath]).toBe(true);
+        // output stream is left unchanged
+        expect(mockCheckResult.mock.calls.length).toBe(1);
+        expect(mockCheckResult.mock.calls[0][0]).toBe(entryContent);
+        expect(
+          prettier.check(mockCheckResult.mock.calls[0][0], prettierOptions)
+        ).toBe(false);
       });
     });
 
