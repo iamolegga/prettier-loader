@@ -63,6 +63,8 @@ function findIgnorePathInParentFolders(folderPath) {
 
 // loader
 
+const loadedFiles = new Set();
+
 module.exports = async function(source, map) {
   this.cacheable();
   const callback = this.async();
@@ -81,10 +83,15 @@ module.exports = async function(source, map) {
     return callback(null, source, map);
   }
 
-  const { skipRewritingSource, ...config } = await getConfig(
+  const { skipRewritingSource, ignoreInitial, ...config } = await getConfig(
     this.resourcePath,
     loaderUtils.getOptions(this)
   );
+
+  if (!!ignoreInitial && !loadedFiles.has(this.resourcePath)) {
+    loadedFiles.add(this.resourcePath);
+    return callback(null, source, map);
+  }
 
   let prettierSource;
   try {
