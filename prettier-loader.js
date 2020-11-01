@@ -22,7 +22,7 @@ async function getConfig(filePath, loaderOptions) {
   );
 
   const mergedConfig = Object.assign(
-    {},
+    { filepath: filePath },
     outerOptions || {},
     passedToLoaderPrettierOptions
   );
